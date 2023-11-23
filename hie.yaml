@@ -1,0 +1,7 @@
+cradle:
+  cabal:
+    - path: "src"
+      component: "lib:plutus-groth"
+
+    - path: "app/Main.hs"
+      component: "exe:plutus-groth"
