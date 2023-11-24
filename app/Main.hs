@@ -1,27 +1,28 @@
 module Main where
 
 
-import qualified Data.ByteString                          as BSL
-import           Flat                                     (flat)
-import           PlutusCore                               (DefaultFun,
-                                                           DefaultUni,
-                                                           NamedDeBruijn)
-import qualified PlutusCore                               as PLC
-import           UntypedPlutusCore                        (Program)
-import qualified UntypedPlutusCore                        as UPLC
-import qualified UntypedPlutusCore.Evaluation.Machine.Cek as Cek
+import qualified Data.ByteString                                   as BSL
+import           Flat                                              (flat)
+import           PlutusCore                                        (DefaultFun,
+                                                                    DefaultUni,
+                                                                    NamedDeBruijn)
+import qualified PlutusCore                                        as PLC
+import qualified UntypedPlutusCore                                 as UPLC
+import           UntypedPlutusCore                                 (Program)
+import qualified UntypedPlutusCore.Evaluation.Machine.Cek          as Cek
 
-import           BLS12_381_V2.Pairing_bls12381            as BLSV2
-import PlutusLedgerApi.V2 ( ExCPU(..), ExBudget(..) )
-import PlutusLedgerApi.V1 (ExMemory(..))
+import           BLS12_381                                         as BLS
 import qualified PlutusCore.Evaluation.Machine.ExBudgetingDefaults as PLC
+import           PlutusLedgerApi.V1                                (ExMemory (..))
+import           PlutusLedgerApi.V2                                (ExBudget (..),
+                                                                    ExCPU (..))
 
 
 
 main :: IO ()
 main = do
-  printProgramCosts BLSV2.testPlutusBLSV2
-  printProgramCosts BLSV2.testMultiplyPoint
+  printProgramCosts BLS.testPlutusBLSV2
+  printProgramCosts BLS.testMultiplyPoint
 
 
 printProgramCosts prog = do

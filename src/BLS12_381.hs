@@ -8,9 +8,10 @@
 
 
 
-module BLS12_381_V2.Pairing_bls12381 where
+module BLS12_381 where
 
 
+import           Control.Monad      (void)
 import           Data.List          (unfoldr)
 import           Data.Maybe         (fromJust)
 import           Debug.Trace        (trace)
@@ -23,7 +24,6 @@ import           PlutusTx.Prelude   hiding (fromInteger, inv, trace)
 import qualified PlutusTx.Prelude   as P
 import           Prelude            (Show, String, show, undefined)
 import qualified UntypedPlutusCore  as UPLC
-import Control.Monad (void)
 
 fieldPrime :: Integer
 fieldPrime = 0x1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaaab
@@ -133,7 +133,7 @@ instance Field Fq2 where
   inv (Fq2 !a1 !a0) = Fq2 (negate a1 * factor) (a0 * factor)
     where
       !factor = inv (a1 * a1 + a0 * a0)
-  
+
   {-# INLINE frobenius #-}
   frobenius (Fq2 !a1 !a0) = Fq2 (negate a1) a0
 
