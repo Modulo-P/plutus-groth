@@ -6,10 +6,9 @@
 
 module Groth16 where
 
-import           Language.Haskell.TH (Type (PromotedInfixT))
-import           PlutusTx            as Tx
+import           PlutusTx         as Tx
 import           PlutusTx.Prelude
-import qualified PlutusTx.Show       as Tx
+import qualified PlutusTx.Show    as Tx
 
 data VerificationKey = VerificationKey {
     nPublic     :: Integer
