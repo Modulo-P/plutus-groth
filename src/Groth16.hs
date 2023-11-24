@@ -1,10 +1,15 @@
+
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell   #-}
+
 
 module Groth16 where
 
-import           PlutusTx         as Tx
+import           Language.Haskell.TH (Type (PromotedInfixT))
+import           PlutusTx            as Tx
 import           PlutusTx.Prelude
-import qualified PlutusTx.Show    as Tx
+import qualified PlutusTx.Show       as Tx
 
 data VerificationKey = VerificationKey {
     nPublic     :: Integer
@@ -17,3 +22,10 @@ data VerificationKey = VerificationKey {
   }
 
 Tx.deriveShow ''VerificationKey
+
+data Proof = Proof {
+    piA :: [Integer]
+  , piB :: [[Integer]]
+  , piC :: [Integer]
+  }
+
