@@ -13,6 +13,7 @@ data VerificationKey = VerificationKey {
   , vkGamma     :: [[Integer]]
   , vkDelta     :: [[Integer]]
   , vkAlphaBeta :: [[[Integer]]]
+  , vkIC        :: [[Integer]]
   }
 
 Tx.deriveShow ''VerificationKey
