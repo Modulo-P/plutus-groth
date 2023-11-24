@@ -8,7 +8,7 @@
 
 
 
-module BLS12_381 where
+module BLS12381 where
 
 
 import           Control.Monad      (void)

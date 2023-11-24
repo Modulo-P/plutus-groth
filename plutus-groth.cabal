@@ -73,7 +73,7 @@ library
 
     -- Modules exported by the library.
     exposed-modules:  
-        , BLS12_381
+          BLS12381
         , Groth16
 
     -- Modules included in this library but not exported.
