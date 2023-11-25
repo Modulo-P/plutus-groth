@@ -4,6 +4,7 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# LANGUAGE BangPatterns       #-}
 {-# LANGUAGE DataKinds          #-}
+{-# LANGUAGE InstanceSigs       #-}
 {-# LANGUAGE TemplateHaskell    #-}
 
 
@@ -75,11 +76,13 @@ instance Field Fq1 where
   inv (Fq1 !a0) = if a0 == 0 then error ()
                             else Fq1 (beea a0 fieldPrime 1 0 fieldPrime)
   {-# INLINE frobenius #-}
+  frobenius :: Fq1 -> Fq1
   frobenius (Fq1 !a0) = Fq1 a0
 
 
 -- Binary Extended Euclidean Algorithm (note that there are no divisions)
 -- See: Guide to Elliptic Curve Cryptography by Hankerson, Menezes, and Vanstone
+{-# INLINE beea #-}
 beea :: Integer -> Integer -> Integer -> Integer -> Integer -> Integer
 beea u v x1 x2 p
   | not (u > 0 && v > 0) = error ()
@@ -93,9 +96,11 @@ beea u v x1 x2 p
   | u < v  = beea u (v - u) x1 (x2 - x1) p
   | otherwise = error ()
 
+{-# INLINE shiftR #-}
 shiftR :: Integer -> Integer -> Integer
 shiftR !a !b = a `divide` (2 ^ b)
 
+{-# INLINE (^) #-}
 infixr 8 ^
 (^) :: ( MultiplicativeMonoid a) =>a -> Integer -> a
 (^) b e              = if e == 0 then one else b * b ^ (e - 1)
@@ -107,34 +112,54 @@ data Fq2 = Fq2 {u1 :: Fq1, u0 :: Fq1}
   deriving (Show)
 
 instance Eq Fq2 where
+  {-# INLINE (==) #-}
+  (==) :: Fq2 -> Fq2 -> Bool
   (==) (Fq2 a1 a0) (Fq2 b1 b0) = a1 == b1 && a0 == b0
 
 instance AdditiveSemigroup Fq2 where
+  {-# INLINE (+) #-}
+  (+) :: Fq2 -> Fq2 -> Fq2
   (+) (Fq2 a1 a0) (Fq2 b1 b0) = Fq2 (a1 + b1) (a0 + b0)
 
 instance AdditiveMonoid Fq2 where
+  {-# INLINE zero #-}
+  zero :: Fq2
   zero = fromInteger 0
 
 instance AdditiveGroup Fq2 where
+  {-# INLINE (-) #-}
+  (-) :: Fq2 -> Fq2 -> Fq2
   (-) (Fq2 a1 a0) (Fq2 b1 b0) = Fq2 (a1 - b1) (a0 - b0)
 
 instance MultiplicativeSemigroup Fq2 where
   -- Opportunity for Karatsuba optimization: https://en.wikipedia.org/wiki/Karatsuba_algorithm
+  {-# INLINE (*) #-}
+  (*) :: Fq2 -> Fq2 -> Fq2
   (*) (Fq2 !a1 !a0) (Fq2 !b1 !b0) = Fq2 (a1 * b0 + a0 * b1) (a0 * b0 - a1 * b1)
 
 instance MultiplicativeMonoid Fq2 where
+  {-# INLINE one #-}
+  one :: Fq2
   one = fromInteger 1
 
 instance FromInteger Fq2 where
+  {-# INLINE fromInteger #-}
+  fromInteger :: Integer -> Fq2
   fromInteger a0 = Fq2 (fromInteger 0) (fromInteger a0)
 
 instance Field Fq2 where
+  {-# INLINE mul_nonres #-}
+  mul_nonres :: Fq2 -> Fq2
   mul_nonres (Fq2 a1 a0) = Fq2 (a1 + a0) (a0 - a1)
+
+  {-# INLINE inv #-}
+  inv :: Fq2 -> Fq2
   inv (Fq2 !a1 !a0) = Fq2 (negate a1 * factor) (a0 * factor)
     where
       !factor = inv (a1 * a1 + a0 * a0)
 
   {-# INLINE frobenius #-}
+  frobenius :: Fq2 -> Fq2
   frobenius (Fq2 !a1 !a0) = Fq2 (negate a1) a0
 
 -- |********************************|
@@ -144,20 +169,29 @@ data Fq6 = Fq6 {v2 :: Fq2, v1 :: Fq2, v0 :: Fq2}
   deriving (Show)
 
 instance Eq Fq6 where
+  {-# INLINE (==) #-}
+  (==) :: Fq6 -> Fq6 -> Bool
   (==) (Fq6 a2 a1 a0) (Fq6 b2 b1 b0) = a2 == b2 && a1 == b1 && a0 == b0
 
 instance AdditiveSemigroup Fq6 where
-
+  {-# INLINE (+) #-}
+  (+) :: Fq6 -> Fq6 -> Fq6
   (+) (Fq6 a2 a1 a0) (Fq6 b2 b1 b0) = Fq6 (a2 + b2) (a1 + b1) (a0 + b0)
 
 instance AdditiveMonoid Fq6 where
+  {-# INLINE zero #-}
+  zero :: Fq6
   zero = Fq6 (fromInteger 0) (fromInteger 0) (fromInteger 0)
 
 instance AdditiveGroup Fq6 where
+  {-# INLINE (-) #-}
+  (-) :: Fq6 -> Fq6 -> Fq6
   (-) (Fq6 a2 a1 a0) (Fq6 b2 b1 b0) = Fq6 (a2 - b2) (a1 - b1) (a0 - b0)
 
 instance MultiplicativeSemigroup Fq6 where
   -- Opportunity for Toom-Cook optimization: https://en.wikipedia.org/wiki/Toom%E2%80%93Cook_multiplication
+  {-# INLINE (*) #-}
+  (*) :: Fq6 -> Fq6 -> Fq6
   (*) (Fq6 !a2 !a1 !a0) (Fq6 !b2 !b1 !b0) = Fq6 c2 c1 c0
     where
       !t0 = a0 * b0
@@ -169,14 +203,22 @@ instance MultiplicativeSemigroup Fq6 where
 
 
 instance MultiplicativeMonoid Fq6 where
+  {-# INLINE one #-}
+  one :: Fq6
   one = Fq6 (fromInteger 0) (fromInteger 0) (fromInteger 1)
 
 instance FromInteger Fq6 where
+  {-# INLINE fromInteger #-}
+  fromInteger :: Integer -> Fq6
   fromInteger a0 = Fq6 (fromInteger 0) (fromInteger 0) (fromInteger a0)
 
 instance Field Fq6 where
-
+  {-# INLINE mul_nonres #-}
+  mul_nonres :: Fq6 -> Fq6
   mul_nonres (Fq6 a2 a1 a0) = Fq6 a1 a0 (mul_nonres a2)
+
+  {-# INLINE inv #-}
+  inv :: Fq6 -> Fq6
   inv (Fq6 !a2 !a1 !a0) = Fq6 (t2 * factor) (t1 * factor) (t0 * factor)
     where
       !t0 = a0 * a0 - mul_nonres (a1 * a2)
@@ -185,6 +227,7 @@ instance Field Fq6 where
       !factor = inv (a0 * t0 + mul_nonres (a2 * t1) + mul_nonres (a1 * t2))
 
   {-# INLINE frobenius #-}
+  frobenius :: Fq6 -> Fq6
   frobenius (Fq6 !a2 !a1 !a0) = Fq6 (frobenius a2 * frobC2) (frobenius a1 * frobC1) (frobenius a0)
     where
         !frobC1 = Fq2 (Fq1 4002409555221667392624310435006688643935503118305586438271171395842971157480381377015405980053539358417135540939436) zero
@@ -197,42 +240,61 @@ data Fq12 = Fq12 {w1 :: Fq6, w0 :: Fq6}
   deriving (Show)
 
 instance Eq Fq12 where
+  {-# INLINE (==) #-}
+  (==) :: Fq12 -> Fq12 -> Bool
   (==) (Fq12 a1 a0) (Fq12 b1 b0) = a1 == b1 && a0 == b0
 
 -- Fq12 is constructed with Fq6(w) / (w^2 - γ) where γ = v
 instance AdditiveSemigroup Fq12 where
-
+  {-# INLINE (+) #-}
+  (+) :: Fq12 -> Fq12 -> Fq12
   (+) (Fq12 a1 a0) (Fq12 b1 b0) = Fq12 (a1 + b1) (a0 + b0)
 
 instance AdditiveMonoid Fq12 where
+  {-# INLINE zero #-}
+  zero :: Fq12
   zero = Fq12 (fromInteger 0) (fromInteger 0)
 
 instance AdditiveGroup Fq12 where
+  {-# INLINE (-) #-}
+  (-) :: Fq12 -> Fq12 -> Fq12
   (-) (Fq12 a1 a0) (Fq12 b1 b0) = Fq12 (a1 - b1) (a0 - b0)
 
+{-# INLINE conjugateFq12 #-}
 conjugateFq12 :: Fq12 -> Fq12
 conjugateFq12 (Fq12 a1 a0) = Fq12 (negate a1) a0
 
 instance MultiplicativeSemigroup Fq12 where
   -- Opportunity for Karatsuba optimization: https://en.wikipedia.org/wiki/Karatsuba_algorithm
+  {-# INLINE (*) #-}
+  (*) :: Fq12 -> Fq12 -> Fq12
   (*) (Fq12 !a1 !a0) (Fq12 !b1 !b0) = Fq12 (a1 * b0 + a0 * b1)
                                        (a0 * b0 + mul_nonres (a1 * b1))
 
 instance MultiplicativeMonoid Fq12 where
+  {-# INLINE one #-}
+  one :: Fq12
   one = Fq12 (fromInteger 0) (fromInteger 1)
 
 instance FromInteger Fq12 where
+  {-# INLINE fromInteger #-}
+  fromInteger :: Integer -> Fq12
   fromInteger a0 = Fq12 (fromInteger 0) (fromInteger a0)
 
 
 instance Field Fq12 where
+  {-# INLINE mul_nonres #-}
+  mul_nonres :: Fq12 -> Fq12
   mul_nonres _ = error ()
 
+  {-# INLINE inv #-}
+  inv :: Fq12 -> Fq12
   inv (Fq12 a1 a0) = Fq12 (negate a1 * factor) (a0 * factor)
     where
       factor = inv (a0 * a0 - mul_nonres (a1 * a1))
 
   {-# INLINE frobenius #-}
+  frobenius :: Fq12 -> Fq12
   frobenius (Fq12 !a1 !a0) = Fq12 a1' (frobenius a0)
     where
         !frobC1 = Fq2 (Fq1 151655185184498381465642749684540099398075398968325446656007613510403227271200139370504932015952886146304766135027)
@@ -250,11 +312,15 @@ data AffinePoint a = Affine {ax :: a, ay :: a}
              deriving Show
 
 instance (MultiplicativeSemigroup a) => MultiplicativeSemigroup (AffinePoint a) where
+  {-# INLINE (*) #-}
+  (*) :: MultiplicativeSemigroup a => AffinePoint a -> AffinePoint a -> AffinePoint a
   (*) PointAtInfinity _             = PointAtInfinity
   (*) _ PointAtInfinity             = PointAtInfinity
   (*) (Affine x1 y1) (Affine x2 y2) = Affine (x1 * x2) (y1 * y2)
 
 instance (Eq a) => Eq (AffinePoint a) where
+  {-# INLINE (==) #-}
+  (==) :: Eq a => AffinePoint a -> AffinePoint a -> Bool
   (==) PointAtInfinity PointAtInfinity = True
   (==) PointAtInfinity _               = False
   (==) _ PointAtInfinity               = False
@@ -265,8 +331,9 @@ data JPoint a = JPoint {jx :: a, jy :: a, jz :: a}
 
 
 instance (MultiplicativeMonoid a, AdditiveGroup a, FromInteger a, Eq a) => AdditiveSemigroup (JPoint a) where
-
   -- add-2007-bl https://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#addition-add-2007-bl
+  {-# INLINE (+) #-}
+  (+) :: (MultiplicativeMonoid a, AdditiveGroup a, FromInteger a, Eq a) => JPoint a -> JPoint a -> JPoint a
   (+) (JPoint x1 y1 z1) (JPoint x2 y2 z2)
     | z1 == zero || z2 == zero =
       if z1 == zero then
@@ -294,14 +361,17 @@ instance (MultiplicativeMonoid a, AdditiveGroup a, FromInteger a, Eq a) => Addit
         y3 = r * (v - x3) - fromInteger 2 * s1 * j
         z3 = ((z1 + z2) ^ 2 - z1z1 - z2z2) * h
 
+{-# INLINE isJacobianPointOnCurve #-}
 jpointAtInfinity :: FromInteger a => JPoint a
 jpointAtInfinity = JPoint (fromInteger 1) (fromInteger 1) (fromInteger 0)
 
-
+{-# INLINE jpointNegate #-}
 jpointNegate :: AdditiveGroup a => JPoint a -> JPoint a
 jpointNegate (JPoint x y z) = JPoint x (negate y) z
 
+
 -- dbl-2009-l https://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#doubling-dbl-2009-l
+{-# INLINE doubleJacobianPoint #-}
 doubleJacobianPoint :: (MultiplicativeMonoid a, AdditiveGroup a, FromInteger a, Eq a) => JPoint a -> JPoint a
 doubleJacobianPoint (JPoint x1 y1 z1) = if z3 == zero then jpointAtInfinity else JPoint x3 y3 z3
   where
@@ -316,15 +386,15 @@ doubleJacobianPoint (JPoint x1 y1 z1) = if z3 == zero then jpointAtInfinity else
     z3 = fromInteger 2 * y1 * z1
 
 -- | Multiply an integer scalar and valid point in either G1 or G2.
-jpointMul :: (Field a, Eq a, MultiplicativeMonoid a, AdditiveGroup a, FromInteger a) => Integer -> JPoint a -> Maybe (JPoint a)
+{-# INLINE jpointMul #-}
+jpointMul :: (Field a, Eq a, MultiplicativeMonoid a, AdditiveGroup a, FromInteger a) => Integer -> JPoint a -> JPoint a
 jpointMul scalar base
-  | isJacobianPointOnCurve base && scalar > 0 = Just (jpointMul' scalar base jpointAtInfinity)
-  | isJacobianPointOnCurve base && scalar < 0 = Just (jpointMul' (negate scalar) (jpointNegate base)
-                                         jpointAtInfinity)
-  | otherwise = Nothing
+  | isJacobianPointOnCurve base && scalar > 0 = jpointMul' scalar base jpointAtInfinity
+  | isJacobianPointOnCurve base && scalar < 0 = jpointMul' (negate scalar) (jpointNegate base) jpointAtInfinity
 
 
 -- Double and add helper loop
+{-# INLINE jpointMul' #-}
 jpointMul' :: (Field a, Eq a, MultiplicativeMonoid a, AdditiveGroup a, FromInteger a) => Integer -> JPoint a -> JPoint a -> JPoint a
 jpointMul' scalar base accum
   | scalar == 0 = accum
@@ -334,11 +404,13 @@ jpointMul' scalar base accum
   where
     doubleBase = doubleJacobianPoint base
 
+{-# INLINE jpointToAffine #-}
 jpointToAffine :: (MultiplicativeMonoid a, Field a) => JPoint a -> AffinePoint a
 jpointToAffine (JPoint x1 y2 z3) = Affine (x1 * invZ33 * z3) (y2 * invZ33)
   where
     invZ33 =inv  z3 ^ 3
 
+{-# INLINE affineToJPoint #-}
 affineToJPoint :: FromInteger a => AffinePoint a -> JPoint a
 affineToJPoint (Affine x y)    = JPoint x y (fromInteger 1)
 affineToJPoint PointAtInfinity = jpointAtInfinity
@@ -346,6 +418,7 @@ affineToJPoint PointAtInfinity = jpointAtInfinity
 -- |********************************|
 -- |***         Miller loop      ***|
 -- |********************************|
+{-# INLINE lineDouble #-}
 lineDouble :: JPoint Fq2 -> AffinePoint Fq1 -> (Fq12, JPoint Fq2)
 lineDouble q@JPoint{jx=xq, jy=yq, jz=zq} (Affine xp yp) = (Fq12 a1 a0, JPoint xt yt zt)
   where
@@ -370,6 +443,7 @@ lineDouble q@JPoint{jx=xq, jy=yq, jz=zq} (Affine xp yp) = (Fq12 a1 a0, JPoint xt
       !a1 = Fq6 zero tmp0'' zero
 lineDouble _ _ = error ()
 
+{-# INLINE lineAdd #-}
 lineAdd :: JPoint Fq2 -> JPoint Fq2 -> AffinePoint Fq1 -> (Fq12, JPoint Fq2)
 lineAdd r@JPoint{jx=xr, jy=yr, jz=zr} q@JPoint{jx=xq, jy=yq, jz=zq}  (Affine xp yp) = (Fq12 l1 l0, JPoint xt yt zt)
   where
@@ -399,9 +473,7 @@ lineAdd r@JPoint{jx=xr, jy=yr, jz=zr} q@JPoint{jx=xq, jy=yq, jz=zq}  (Affine xp 
     !l1 = Fq6 zero t10'' zero
 lineAdd _ _ _ = error ()
 
-traceMillerLoop :: (Show p, Show a) => p -> a -> a
-traceMillerLoop step t = trace ("Step: " ++ show step ++ " " ++ show t) t
-
+{-# INLINE millerLoop #-}
 millerLoop :: AffinePoint Fq1 -> JPoint Fq2 -> Fq12 -> JPoint Fq2 -> [Integer] -> Integer -> (Fq12, JPoint Fq2)
 millerLoop !p !q !f !t [] !step = (conjugateFq12 (f*ld), doublet)
   where
@@ -414,6 +486,7 @@ millerLoop !p !q !f !t (i:is) !step
       f' = ld * f
       (la, addt) = lineAdd doublet q p
 
+{-# INLINE miller #-}
 miller :: AffinePoint Fq1 -> JPoint Fq2 -> Fq12
 miller p q@JPoint{jx=qx, jy=qy, jz=qz} = pow'' loop
   where
@@ -421,6 +494,7 @@ miller p q@JPoint{jx=qx, jy=qy, jz=qz} = pow'' loop
     t = q
     (!loop, !tloop) = millerLoop p q f t iterations 1
 
+{-# INLINE pairing #-}
 pairing :: AffinePoint Fq1 -> JPoint Fq2 -> Fq12
 pairing !p !q = m
   where
@@ -429,21 +503,26 @@ pairing !p !q = m
 t :: Integer
 t = 0xd201000000010000
 
+{-# INLINE iterations #-}
 iterations :: [Integer]
 iterations = tail $ reverse $ tail $
   unfoldr (\b -> if b == (0 :: Integer) then Nothing
                   else Just(if odd b then 1 else 0, shiftR b 1)) t
 
+{-# INLINE iterationsExp #-}
+iterationsExp :: [Bool]
 iterationsExp = reverse $
       unfoldr (\b -> if b == (0 :: Integer) then Nothing
                       else Just(if odd b then True else False, shiftR b 1)) t
 
+{-# INLINE pow' #-}
 pow' :: (Field a, MultiplicativeSemigroup a) => a -> [Bool] -> a -> a
 pow' !a0 [] accum = accum
 pow' !a0 (o:os) accum = pow' a0 os loop
   where
     !loop = if o then accum * accum * a0 else accum * accum
 
+{-# INLINE pow'' #-}
 pow'' :: Fq12 -> Fq12
 pow'' !f = f'
   where
@@ -475,10 +554,6 @@ pow'' !f = f'
     !t3'''' = t3''' * t6'''
     !f' = t3'''' * t4''
 
-
-
-
-
 -- |********************************|
 -- |***         Test             ***|
 -- |********************************|
@@ -494,7 +569,7 @@ testPlutusBLSV2 = getPlc $$(Tx.compile [|| testVector ||])
 g1GeneratorJPoint :: JPoint Fq1
 g1GeneratorJPoint = affineToJPoint g1Generator
 
-multipliedPoint :: Maybe (JPoint Fq1)
+multipliedPoint :: JPoint Fq1
 multipliedPoint = jpointMul fieldPrime g1GeneratorJPoint
 
 

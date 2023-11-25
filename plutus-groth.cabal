@@ -110,7 +110,8 @@ executable plutus-groth
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
-    -- other-modules:
+    other-modules:
+        Groth16Plc
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -141,7 +142,8 @@ test-suite plutus-groth-test
     default-language: Haskell2010
 
     -- Modules included in this executable, other than Main.
-    -- other-modules:
+    other-modules:
+        Groth16Test
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -158,4 +160,6 @@ test-suite plutus-groth-test
     -- Test dependencies.
     build-depends:
         base >= 4.9 && < 5,
-        plutus-groth
+        plutus-groth,
+        tasty,
+        tasty-hunit

@@ -11,7 +11,8 @@ import qualified UntypedPlutusCore                                 as UPLC
 import           UntypedPlutusCore                                 (Program)
 import qualified UntypedPlutusCore.Evaluation.Machine.Cek          as Cek
 
-import           BLS12_381                                         as BLS
+import           BLS12381                                          as BLS
+import           Groth16Plc                                        (getPlcProof01)
 import qualified PlutusCore.Evaluation.Machine.ExBudgetingDefaults as PLC
 import           PlutusLedgerApi.V1                                (ExMemory (..))
 import           PlutusLedgerApi.V2                                (ExBudget (..),
@@ -23,6 +24,7 @@ main :: IO ()
 main = do
   printProgramCosts BLS.testPlutusBLSV2
   printProgramCosts BLS.testMultiplyPoint
+  printProgramCosts getPlcProof01
 
 
 printProgramCosts prog = do
