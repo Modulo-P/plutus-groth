@@ -28,11 +28,17 @@ data VerificationKey = VerificationKey {
   , vkIC        :: [[Integer]]
   }
 
+unstableMakeIsData ''VerificationKey
+
+
 data Proof = Proof {
     piA :: [Integer]
   , piB :: [[Integer]]
   , piC :: [Integer]
   }
+
+unstableMakeIsData ''Proof
+
 
 {-# INLINABLE arrayToG1 #-}
 arrayToG1 :: [Integer] -> AffinePoint Fq1
