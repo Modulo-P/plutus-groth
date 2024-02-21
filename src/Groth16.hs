@@ -3,7 +3,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell   #-}
 
-
 module Groth16 where
 
 import           BLS12381         (AffinePoint (..), Fq1, Fq2 (..),
@@ -66,4 +65,4 @@ verify vk pi pub =
 
     eCDelta = pairing (arrayToG1 (piC pi)) (arrayToG2 (vkDelta vk))
   in
-    eAB == eAlphaBeta * eIGamma
+    eAB == eAlphaBeta * eIGamma * eCDelta

@@ -94,7 +94,7 @@ library
         plutus-ledger-api -any,
         plutus-tx -any,
         plutus-tx-plugin -any,
-        plutus-core -any,
+        plutus-core ==1.14.0.0,
 
     -- Directories containing source files.
     hs-source-dirs:   src
@@ -126,7 +126,8 @@ executable plutus-groth
         plutus-ledger-api -any,
         plutus-tx -any,
         plutus-tx-plugin -any,
-        plutus-core,
+        plutus-core ==1.14.0.0,
+
 
     -- Directories containing source files.
     hs-source-dirs:   app

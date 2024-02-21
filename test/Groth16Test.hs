@@ -130,3 +130,7 @@ pi01 = Proof
 testProof01 :: TestTree
 testProof01 = testCase "Test proof 01 verification" $ do
   assertEqual "Verify function returns True" (verify vk01 pi01 [168932]) True
+
+testProof02 :: TestTree
+testProof02 = testCase "Test proof 02 verification should fail on invalid public input" $ do
+  assertEqual "Verify function returns False" (verify vk01 pi01 [42]) False

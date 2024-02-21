@@ -22,15 +22,23 @@ import           PlutusLedgerApi.V2                                (ExBudget (..
 
 main :: IO ()
 main = do
+  putStrLn "Plutus Core Groth16 benchmarks"
+  putStrLn "==============================="
+  putStrLn ""
+  putStrLn "Single pairing benchmark"
   printProgramCosts BLS.testPlutusBLSV2
+  putStrLn ""
+  putStrLn "Point multiplication benchmark"
   printProgramCosts BLS.testMultiplyPoint
+  putStrLn ""
+  putStrLn "Complete proof benchmark"
   printProgramCosts getPlcProof01
 
 
 printProgramCosts prog = do
   let (cpu, mem) = getCostsCek prog
-  putStrLn $ "CPU: " ++ "10000000000" ++ " MEM: " ++ "14000000"
-  putStrLn $ "CPU: " ++ show cpu ++ " MEM: " ++ show mem
+  putStrLn $ "CPU: " ++ "10000000000" ++ " MEM: " ++ "14000000 (Maximum budget)"
+  putStrLn $ "CPU: " ++ show cpu ++ " MEM: " ++ show mem ++ " (Actual costs)"
 
 -- | Evaluate a script and return the CPU and memory costs (according to the cost model)
 
