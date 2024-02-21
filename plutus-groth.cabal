@@ -126,7 +126,7 @@ executable plutus-groth
         plutus-ledger-api -any,
         plutus-tx -any,
         plutus-tx-plugin -any,
-        plutus-core ==1.14.0.0,
+        plutus-core -any,
 
 
     -- Directories containing source files.
