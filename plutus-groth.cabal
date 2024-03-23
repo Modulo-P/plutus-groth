@@ -66,6 +66,7 @@ common lang
         -fno-unbox-strict-fields
         -fno-unbox-small-strict-fields
         -fplugin-opt PlutusTx.Plugin:defer-errors
+        -fplugin-opt PlutusTx.Plugin:target-version=1.0.0
 
 library
     -- Import common flags.

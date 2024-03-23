@@ -12,7 +12,8 @@ import           UntypedPlutusCore                                 (Program)
 import qualified UntypedPlutusCore.Evaluation.Machine.Cek          as Cek
 
 import           BLS12381                                          as BLS
-import           Groth16Plc                                        (getPlcProof01)
+import           Groth16Plc                                        (getPlcProof01,
+                                                                    getPlcProof02)
 import qualified PlutusCore.Evaluation.Machine.ExBudgetingDefaults as PLC
 import           PlutusLedgerApi.V1                                (ExMemory (..))
 import           PlutusLedgerApi.V2                                (ExBudget (..),
@@ -31,8 +32,10 @@ main = do
   putStrLn "Point multiplication benchmark"
   printProgramCosts BLS.testMultiplyPoint
   putStrLn ""
-  putStrLn "Complete proof benchmark"
+  putStrLn "Complete proof 01 benchmark"
   printProgramCosts getPlcProof01
+  putStrLn "Complete proof 02 benchmark"
+  printProgramCosts getPlcProof02
 
 
 printProgramCosts prog = do

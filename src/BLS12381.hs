@@ -389,8 +389,9 @@ doubleJacobianPoint (JPoint x1 y1 z1) = if z3 == zero then jpointAtInfinity else
 {-# INLINE jpointMul #-}
 jpointMul :: (Field a, Eq a, MultiplicativeMonoid a, AdditiveGroup a, FromInteger a) => Integer -> JPoint a -> JPoint a
 jpointMul scalar base
-  | isJacobianPointOnCurve base && scalar > 0 = jpointMul' scalar base jpointAtInfinity
-  | isJacobianPointOnCurve base && scalar < 0 = jpointMul' (negate scalar) (jpointNegate base) jpointAtInfinity
+  | scalar > 0 = jpointMul' scalar base jpointAtInfinity
+  | scalar < 0 = jpointMul' (negate scalar) (jpointNegate base) jpointAtInfinity
+  | scalar == 0 = jpointAtInfinity
 
 
 -- Double and add helper loop
